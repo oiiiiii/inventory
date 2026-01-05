@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 主色调（库存管理类APP选用偏清新的蓝绿色系） -->
+    <color name="primary">#0F9D58</color>
+    <color name="primary_variant">#0B7D48</color>
+    <color name="secondary">#4285F4</color>
+    <color name="secondary_variant">#3367D6</color>
+
+    <!-- 提醒相关颜色（临期/过期醒目展示） -->
+    <color name="warning_near_expire">#FF9800</color> <!-- 临期-橙色 -->
+    <color name="warning_expired">#F44336</color>    <!-- 过期-红色 -->
+    <color name="warning_text">#FFFFFF</color>       <!-- 提醒文本白色 -->
+
+    <!-- 文本颜色 -->
+    <color name="text_primary">#212121</color>       <!-- 主要文本（黑色系） -->
+    <color name="text_secondary">#757575</color>     <!-- 次要文本（灰色系） -->
+    <color name="text_hint">#9E9E9E</color>          <!-- 输入框提示文本 -->
+    <color name="text_error">#F44336</color>         <!-- 错误提示文本 -->
+
+    <!-- 背景色 -->
+    <color name="background">#F5F5F5</color>         <!-- 页面整体背景 -->
+    <color name="surface">#FFFFFF</color>            <!-- 卡片/控件背景 -->
+    <color name="surface_variant">#EEEEEE</color>    <!-- 次要控件背景 -->
+
+    <!-- 使用记录颜色 -->
+    <color name="record_create">#E8F5E9</color>      <!-- 创建记录背景（浅绿） -->
+    <color name="record_modify">#E3F2FD</color>      <!-- 修改记录背景（浅蓝） -->
+    <color name="record_create_text">#0B7D48</color> <!-- 创建记录文本 -->
+    <color name="record_modify_text">#3367D6</color> <!-- 修改记录文本 -->
+
+    <!-- 按钮/交互控件颜色 -->
+    <color name="button_primary">#0F9D58</color>     <!-- 主按钮背景 -->
+    <color name="button_primary_pressed">#0B7D48</color> <!-- 主按钮按压态 -->
+    <color name="button_secondary">#4285F4</color>   <!-- 次要按钮背景 -->
+    <color name="button_secondary_pressed">#3367D6</color> <!-- 次要按钮按压态 -->
+    <color name="button_text">#FFFFFF</color>        <!-- 按钮文本 -->
+
+    <!-- 分割线/边框色 -->
+    <color name="divider">#E0E0E0</color>            <!-- 通用分割线 -->
+    <color name="border">#EEEEEE</color>             <!-- 控件边框 -->
+
+    <!-- 进度条/加载色 -->
+    <color name="progress">#0F9D58</color>           <!-- 加载进度条颜色 -->
+
+    <!-- 空状态/提示色 -->
+    <color name="empty_text">#9E9E9E</color>         <!-- 暂无数据提示文本 -->
+
+    <!-- Snackbar 颜色 -->
+    <color name="snackbar_background">#323232</color> <!-- Snackbar背景 -->
+    <color name="snackbar_text">#FFFFFF</color>       <!-- Snackbar文本 -->
+    <color name="snackbar_action">#0F9D58</color>     <!-- Snackbar操作文本 -->
+
+</resources>

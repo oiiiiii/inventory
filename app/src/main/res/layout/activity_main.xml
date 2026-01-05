@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    tools:context=".MainActivity">
+
+    <!-- 顶部标题栏 -->
+    <LinearLayout
+        android:id="@+id/ll_title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/primary"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="物品库存管理"
+            android:textColor="@color/button_text"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- 添加物品按钮 -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_add_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add_white_24dp"
+            android:contentDescription="添加物品"
+            android:backgroundTint="@color/secondary"
+            android:elevation="4dp"/>
+    </LinearLayout>
+
+    <!-- 加载进度条（居中显示） -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <!-- 空状态提示（居中显示） -->
+    <LinearLayout
+        android:id="@+id/ll_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingHorizontal="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="暂无物品数据"
+            android:textColor="@color/empty_text"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="点击右上角+号添加第一个物品吧～"
+            android:textColor="@color/empty_text"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 物品列表RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_item_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/ll_title_bar"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:visibility="gone" />
+
+    <!-- 加载更多提示（列表底部） -->
+    <TextView
+        android:id="@+id/tv_load_more"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rv_item_list"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="正在加载更多..."
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+</RelativeLayout>

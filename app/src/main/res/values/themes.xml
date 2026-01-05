@@ -1,0 +1,49 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 库存管理APP的基础主题（全兼容版本） -->
+    <style name="Theme.Inventory" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 主色调：关联自定义colors.xml -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+
+        <!-- 文本颜色 -->
+        <item name="colorOnPrimary">@color/button_text</item>
+        <item name="colorOnSecondary">@color/button_text</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <!-- 背景色：用android命名空间，全版本兼容 -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+
+        <!-- 错误提示色 -->
+        <item name="colorError">@color/text_error</item>
+        <item name="colorOnError">@color/warning_text</item>
+
+        <!-- 状态栏/导航栏：限定API 21+ -->
+        <item name="android:statusBarColor" tools:targetApi="21">?attr/colorPrimary</item>
+        <item name="android:navigationBarColor" tools:targetApi="21">?attr/colorSurface</item>
+
+        <!-- 按钮样式：改用基础样式，避免高版本属性冲突 -->
+        <item name="materialButtonStyle">@style/Widget.Inventory.Button.Primary</item>
+    </style>
+
+    <!-- 自定义主按钮样式（全兼容版本，放弃pressBackgroundTint） -->
+    <style name="Widget.Inventory.Button.Primary" parent="Widget.Material3.Button.ElevatedButton">
+        <item name="backgroundTint">@color/button_primary</item>
+        <!-- 移除pressBackgroundTint，改用android:state_pressed（基础兼容方式） -->
+        <item name="android:background">@drawable/btn_primary_selector</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- 自定义次要按钮样式 -->
+    <style name="Widget.Inventory.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/button_secondary</item>
+        <item name="android:textColor">@color/button_secondary</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+</resources>

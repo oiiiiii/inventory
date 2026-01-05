@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 默认分类列表 -->
+    <string-array name="default_category">
+        <item>未分类</item>
+        <item>食品</item>
+        <item>日用品</item>
+        <item>办公用品</item>
+        <item>电子产品</item>
+    </string-array>
+
+    <!-- 默认子分类列表 -->
+    <string-array name="default_sub_category">
+        <item>未指定</item>
+        <item>饮料</item>
+        <item>零食</item>
+        <item>洗护用品</item>
+        <item>文具</item>
+    </string-array>
+
+    <!-- 默认位置列表 -->
+    <string-array name="default_location">
+        <item>未指定</item>
+        <item>厨房</item>
+        <item>客厅</item>
+        <item>书房</item>
+        <item>办公室</item>
+    </string-array>
+</resources>

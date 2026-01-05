@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Inventory</string>
+    <string name="hint_item_name">请输入物品名称*</string>
+    <string name="error_item_name_empty">物品名称不能为空</string>
+    <string name="text_no_data">暂无物品</string>
+    <string name="btn_add_item">添加物品</string>
+    <string name="btn_submit">提交</string>
+    <string name="btn_cancel">取消</string>
+    <!-- Spinner提示文字 -->
+    <string name="prompt_category">请选择分类</string>
+    <string name="prompt_sub_category">请选择子分类</string>
+    <string name="prompt_location">请选择存放位置</string>
+</resources>

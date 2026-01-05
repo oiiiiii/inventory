@@ -1,0 +1,74 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace "com.example.inventory"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.inventory"
+        minSdk 28
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    // 启用视图绑定（简化XML布局调用）
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    // 基础AndroidX依赖
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // ViewModel + LiveData（状态管理）
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.7.0'
+
+    // Room数据库（本地存储）
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+
+    // Navigation Component（页面跳转）
+    implementation 'androidx.navigation:navigation-fragment:2.7.6'
+    implementation 'androidx.navigation:navigation-ui:2.7.6'
+
+    // DataStore（替代SharedPreferences）
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+
+    // Glide（图片加载）
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
+
+    // Zip4j（ZIP导入导出）
+    implementation 'net.lingala.zip4j:zip4j:2.11.5'
+
+    // Material DateTime Picker（日期选择）
+    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+
+    // PermissionX（权限申请）
+    implementation 'com.guolindev.permissionx:permissionx:1.7.1'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
