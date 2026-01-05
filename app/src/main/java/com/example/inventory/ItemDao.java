@@ -27,12 +27,18 @@ public interface ItemDao {
     void delete(Item item);
 
     // 根据ID查询物品
-    @Query("SELECT * FROM item WHERE id = :itemId")
-    LiveData<Item> getItemById(String itemId);
 
     // 查询所有物品（按创建时间倒序）
     @Query("SELECT * FROM item ORDER BY createTime DESC")
     LiveData<List<Item>> getAllItems();
+
+    // 新增：根据ID查询单个物品
+    @Query("SELECT * FROM item WHERE id = :itemId LIMIT 1")
+    LiveData<Item> getItemById(String itemId);
+
+    // 新增：更新物品
+    @Update
+    void updateItem(Item item);
 
     // 分页查询物品（按创建时间倒序）
     @Query("SELECT * FROM item ORDER BY createTime DESC LIMIT :pageSize OFFSET :offset")

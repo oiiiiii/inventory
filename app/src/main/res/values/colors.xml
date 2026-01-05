@@ -49,5 +49,9 @@
     <color name="snackbar_background">#323232</color> <!-- Snackbar背景 -->
     <color name="snackbar_text">#FFFFFF</color>       <!-- Snackbar文本 -->
     <color name="snackbar_action">#0F9D58</color>     <!-- Snackbar操作文本 -->
+    <!-- 危险色（删除按钮） -->
+    <color name="danger">#F44336</color>
+    <!-- 危险色按下状态 -->
+    <color name="danger_pressed">#D32F2F</color>
 
 </resources>

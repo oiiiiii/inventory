@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-
+import java.util.UUID;
 /**
  * 物品实体类
  * 对应Room数据库的item表
@@ -14,7 +14,7 @@ public class Item {
     // UUID作为主键，唯一标识物品（强制非空）
     @PrimaryKey
     @NonNull
-    private String id;
+    private String id = UUID.randomUUID().toString();
 
     // 物品名称（必填，非空）
     @NonNull
@@ -66,8 +66,10 @@ public class Item {
         this.expiryDate = expiryDate;
         this.description = description;
         this.imagePaths = imagePaths;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
+        // 默认初始化时间
+        long currentTime = System.currentTimeMillis();
+        this.createTime = new java.text.SimpleDateFormat("yyyy.MM.dd HH:mm", java.util.Locale.getDefault()).format(currentTime);
+        this.updateTime = this.createTime;
     }
 
     // ==================== 所有字段的Getter/Setter方法（必须完整） ====================

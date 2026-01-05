@@ -17,7 +17,9 @@ import java.util.Locale;
  */
 public class InventoryViewModel extends AndroidViewModel {
     // 仓库实例
-    private InventoryRepository repository;
+    private InventoryRepository mRepository;
+    private LiveData<List<Item>> mAllItems;
+
 
     // 界面状态：物品列表（分页加载）
     private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();
@@ -37,41 +39,44 @@ public class InventoryViewModel extends AndroidViewModel {
     // 日期格式化（用于生成创建/修改时间）
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault());
 
-    public InventoryViewModel(@NonNull Application application) {
+    public InventoryViewModel(Application application) {
         super(application);
-        // 初始化仓库
-        repository = new InventoryRepository(application);
-        // 初始化全局LiveData
-        allCategories = repository.getAllCategories();
-        allLocations = repository.getAllLocations();
+        // 初始化Repository（传入Application）
+        mRepository = new InventoryRepository(application);
+        // 初始化物品列表（可根据需求替换为分页查询）
+        mAllItems = mRepository.getItemsByPage(20, 0); // 每页20条，第一页
     }
+
+
 
     // ==================== 物品相关操作 ====================
     // 插入物品
     public void insertItem(Item item) {
-        String currentTime = dateFormat.format(new Date());
-        repository.insertItem(item, currentTime);
+        mRepository.insertItem(item);
     }
 
-    // 更新物品（需传入修改的字段描述，如"名称、分类"）
-    public void updateItem(Item oldItem, Item newItem, String modifiedFields) {
-        String currentTime = dateFormat.format(new Date());
-        repository.updateItem(oldItem, newItem, currentTime, modifiedFields);
+
+
+
+
+    // 更新物品
+    public void updateItem(Item item) {
+        mRepository.updateItem(item);
     }
 
     // 删除物品
     public void deleteItem(Item item) {
-        repository.deleteItem(item);
+        mRepository.deleteItem(item);
     }
 
     // 根据ID查询物品
     public LiveData<Item> getItemById(String itemId) {
-        return repository.getItemById(itemId);
+        return mRepository.getItemById(itemId);
     }
 
     // 获取物品使用记录
     public LiveData<List<UsageRecord>> getRecordsByItemId(String itemId) {
-        return repository.getRecordsByItemId(itemId);
+        return mRepository.getRecordsByItemId(itemId);
     }
 
     // ==================== 分页加载相关 ====================
@@ -100,7 +105,7 @@ public class InventoryViewModel extends AndroidViewModel {
         int offset = (page - 1) * pageSize; // 计算偏移量（从0开始）
 
         // 这里先实现"加载所有物品"，后续可扩展筛选/搜索逻辑
-        repository.getItemsByPage(pageSize, offset).observeForever(items -> {
+        mRepository.getItemsByPage(pageSize, offset).observeForever(items -> {
             isLoadingLiveData.setValue(false);
             if (items == null || items.isEmpty()) {
                 if (page == 1) {
@@ -136,7 +141,7 @@ public class InventoryViewModel extends AndroidViewModel {
         isLoadingLiveData.setValue(true);
         int offset = (currentPage - 1) * pageSize;
 
-        repository.getExpiringItems(days, pageSize, offset).observeForever(items -> {
+        mRepository.getExpiringItems(days, pageSize, offset).observeForever(items -> {
             handleFilterData(items, currentPage);
         });
     }
@@ -148,7 +153,7 @@ public class InventoryViewModel extends AndroidViewModel {
         isLoadingLiveData.setValue(true);
         int offset = (currentPage - 1) * pageSize;
 
-        repository.getExpiredItems(pageSize, offset).observeForever(items -> {
+        mRepository.getExpiredItems(pageSize, offset).observeForever(items -> {
             handleFilterData(items, currentPage);
         });
     }
@@ -160,7 +165,7 @@ public class InventoryViewModel extends AndroidViewModel {
         isLoadingLiveData.setValue(true);
         int offset = (currentPage - 1) * pageSize;
 
-        repository.searchItemsByName(keyword, pageSize, offset).observeForever(items -> {
+        mRepository.searchItemsByName(keyword, pageSize, offset).observeForever(items -> {
             handleFilterData(items, currentPage);
         });
     }
@@ -194,57 +199,57 @@ public class InventoryViewModel extends AndroidViewModel {
 
     // ==================== 分类相关操作 ====================
     public void insertCategory(Category category) {
-        repository.insertCategory(category);
+        mRepository.insertCategory(category);
     }
 
     public void updateCategory(Category category) {
-        repository.updateCategory(category);
+        mRepository.updateCategory(category);
     }
 
     public void deleteCategory(Category category) {
-        repository.deleteCategory(category);
+        mRepository.deleteCategory(category);
     }
 
     public Category getCategoryByName(String name) {
-        return repository.getCategoryByName(name);
+        return mRepository.getCategoryByName(name);
     }
 
     // ==================== 子分类相关操作 ====================
     public void insertSubCategory(SubCategory subCategory) {
-        repository.insertSubCategory(subCategory);
+        mRepository.insertSubCategory(subCategory);
     }
 
     public void updateSubCategory(SubCategory subCategory) {
-        repository.updateSubCategory(subCategory);
+        mRepository.updateSubCategory(subCategory);
     }
 
     public void deleteSubCategory(SubCategory subCategory) {
-        repository.deleteSubCategory(subCategory);
+        mRepository.deleteSubCategory(subCategory);
     }
 
     public LiveData<List<SubCategory>> getSubCategoriesByCategoryId(long categoryId) {
-        return repository.getSubCategoriesByCategoryId(categoryId);
+        return mRepository.getSubCategoriesByCategoryId(categoryId);
     }
 
     public SubCategory getSubCategoryByName(long categoryId, String name) {
-        return repository.getSubCategoryByName(categoryId, name);
+        return mRepository.getSubCategoryByName(categoryId, name);
     }
 
     // ==================== 位置相关操作 ====================
     public void insertLocation(Location location) {
-        repository.insertLocation(location);
+        mRepository.insertLocation(location);
     }
 
     public void updateLocation(Location location) {
-        repository.updateLocation(location);
+        mRepository.updateLocation(location);
     }
 
     public void deleteLocation(Location location) {
-        repository.deleteLocation(location);
+        mRepository.deleteLocation(location);
     }
 
     public Location getLocationByName(String name) {
-        return repository.getLocationByName(name);
+        return mRepository.getLocationByName(name);
     }
 
     // ==================== LiveData getter（UI层观察） ====================

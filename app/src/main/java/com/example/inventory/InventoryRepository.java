@@ -12,7 +12,7 @@ import java.util.UUID;
  * 数据仓库：封装所有数据库操作，提供统一API给ViewModel
  */
 public class InventoryRepository {
-    // 5个DAO实例
+    // DAO实例（移除重复定义的mItemDao，统一使用itemDao）
     private ItemDao itemDao;
     private CategoryDao categoryDao;
     private SubCategoryDao subCategoryDao;
@@ -23,11 +23,11 @@ public class InventoryRepository {
     private LiveData<List<Category>> allCategories;
     private LiveData<List<Location>> allLocations;
 
-    // 构造函数：初始化数据库和DAO
+    // 构造函数：初始化数据库和DAO（核心：仅保留一个构造方法，基于Application）
     public InventoryRepository(Application application) {
-        // 获取Room数据库实例
+        // 获取Room数据库实例（适配你的InventoryDatabase）
         InventoryDatabase database = InventoryDatabase.getInstance(application);
-        // 初始化DAO
+        // 初始化所有DAO
         itemDao = database.itemDao();
         categoryDao = database.categoryDao();
         subCategoryDao = database.subCategoryDao();
@@ -38,52 +38,90 @@ public class InventoryRepository {
         allLocations = locationDao.getAllLocations();
     }
 
-    // ==================== 物品相关操作 ====================
-    // 插入物品（含创建记录）
-    public void insertItem(Item item, String createTime) {
+    // ==================== 物品核心操作（适配编辑/新增/删除） ====================
+    /**
+     * 新增物品（简化版：自动生成时间，适配AddItemActivity的新增逻辑）
+     * @param item 待新增的物品对象
+     */
+    public void insertItem(Item item) {
         // 生成UUID作为物品ID
         item.setId(UUID.randomUUID().toString());
-        item.setCreateTime(createTime);
-        item.setUpdateTime(createTime);
-        // 插入物品到数据库
-        new InsertItemAsyncTask(itemDao, usageRecordDao).execute(item, createTime);
+        // 生成当前时间（统一格式）
+        String currentTime = new java.text.SimpleDateFormat("yyyy.MM.dd HH:mm", java.util.Locale.getDefault()).format(System.currentTimeMillis());
+        item.setCreateTime(currentTime);
+        item.setUpdateTime(currentTime);
+        // 异步插入物品 + 记录
+        new InsertItemAsyncTask(itemDao, usageRecordDao).execute(item, currentTime);
     }
 
-    // 更新物品（含修改记录）
-    public void updateItem(Item oldItem, Item newItem, String updateTime, String modifiedFields) {
-        newItem.setId(oldItem.getId()); // 保留原ID
-        newItem.setCreateTime(oldItem.getCreateTime()); // 保留创建时间
-        newItem.setUpdateTime(updateTime); // 更新修改时间
-        // 执行更新 + 插入修改记录
-        new UpdateItemAsyncTask(itemDao, usageRecordDao).execute(newItem, updateTime, modifiedFields);
+    /**
+     * 编辑物品（适配AddItemActivity的编辑逻辑）
+     * @param item 待更新的物品对象（已保留原ID，修改了字段）
+     */
+    public void updateItem(Item item) {
+        // 更新修改时间
+        String updateTime = new java.text.SimpleDateFormat("yyyy.MM.dd HH:mm", java.util.Locale.getDefault()).format(System.currentTimeMillis());
+        item.setUpdateTime(updateTime);
+        // 异步更新物品 + 记录（默认修改字段为“全部”，可根据实际需求调整）
+        new UpdateItemAsyncTask(itemDao, usageRecordDao).execute(item, updateTime, "名称、分类、位置、数量、有效期、描述");
     }
 
-    // 删除物品（含关联的使用记录）
+    /**
+     * 删除物品（适配ItemDetailActivity的删除逻辑）
+     * @param item 待删除的物品对象
+     */
     public void deleteItem(Item item) {
         new DeleteItemAsyncTask(itemDao, usageRecordDao).execute(item);
     }
 
-    // 根据ID查询物品
+    /**
+     * 根据ID查询物品（核心：适配详情页/编辑页的数据加载）
+     * @param itemId 物品唯一ID
+     * @return 包含物品数据的LiveData
+     */
     public LiveData<Item> getItemById(String itemId) {
         return itemDao.getItemById(itemId);
     }
 
-    // 分页查询所有物品
+    // ==================== 物品扩展操作（分页/搜索/过期查询） ====================
+    /**
+     * 分页查询所有物品
+     * @param pageSize 每页数量
+     * @param offset 偏移量
+     * @return 分页物品列表
+     */
     public LiveData<List<Item>> getItemsByPage(int pageSize, int offset) {
         return itemDao.getItemsByPage(pageSize, offset);
     }
 
-    // 模糊查询物品（按名称）
+    /**
+     * 模糊搜索物品（按名称）
+     * @param keyword 搜索关键词
+     * @param pageSize 每页数量
+     * @param offset 偏移量
+     * @return 匹配的物品列表
+     */
     public LiveData<List<Item>> searchItemsByName(String keyword, int pageSize, int offset) {
-        return itemDao.searchItemsByName(keyword, pageSize, offset);
+        return itemDao.searchItemsByName("%" + keyword + "%", pageSize, offset);
     }
 
-    // 查询临期物品
+    /**
+     * 查询临期物品
+     * @param days 临期天数（如7天内）
+     * @param pageSize 每页数量
+     * @param offset 偏移量
+     * @return 临期物品列表
+     */
     public LiveData<List<Item>> getExpiringItems(int days, int pageSize, int offset) {
         return itemDao.getExpiringItems(days, pageSize, offset);
     }
 
-    // 查询过期物品
+    /**
+     * 查询过期物品
+     * @param pageSize 每页数量
+     * @param offset 偏移量
+     * @return 过期物品列表
+     */
     public LiveData<List<Item>> getExpiredItems(int pageSize, int offset) {
         return itemDao.getExpiredItems(pageSize, offset);
     }
@@ -106,7 +144,7 @@ public class InventoryRepository {
     }
 
     public Category getCategoryByName(String name) {
-        // 同步查询（非LiveData，需在IO线程调用）
+        // 同步查询需在子线程执行（此处仅返回DAO结果，ViewModel层需处理线程）
         return categoryDao.getCategoryByName(name);
     }
 
@@ -157,7 +195,7 @@ public class InventoryRepository {
         return usageRecordDao.getRecordsByItemId(itemId);
     }
 
-    // ==================== 异步任务类（AsyncTask，兼容API 28+） ====================
+    // ==================== 异步任务类（AsyncTask，兼容所有操作） ====================
     // 插入物品 + 插入创建记录
     private static class InsertItemAsyncTask extends AsyncTask<Object, Void, Void> {
         private ItemDao itemDao;

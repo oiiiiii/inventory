@@ -121,7 +121,9 @@ public class MainActivity extends AppCompatActivity {
         mRvItemList.setLayoutManager(layoutManager);
         mItemAdapter = new ItemAdapter(this, new ArrayList<>(), item -> {
             // 物品条目点击事件（后续跳转到详情页）
-            // 暂未实现，先留空
+            Intent intent = new Intent(MainActivity.this, ItemDetailActivity.class);
+            intent.putExtra(ItemDetailActivity.EXTRA_ITEM_ID, item.getId());
+            startActivity(intent);
         });
         mRvItemList.setAdapter(mItemAdapter);
 
