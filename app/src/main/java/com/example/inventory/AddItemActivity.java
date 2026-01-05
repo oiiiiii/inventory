@@ -1,9 +1,15 @@
 package com.example.inventory;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class AddItemActivity extends AppCompatActivity {
@@ -31,6 +39,11 @@ public class AddItemActivity extends AppCompatActivity {
     private Button mBtnSubmit;
     private EditText mEtDescription;
     private TextView mTvPageTitle; // 直接获取标题控件，避免重复findViewById
+    // 新增：图片相关控件
+    private Button mBtnSelectImage;
+    private RecyclerView mRvImagePreview;
+    private ImagePreviewAdapter mImageAdapter;
+    private List<String> mImagePaths = new ArrayList<>();
 
     // ViewModel
     private InventoryViewModel mViewModel;
@@ -75,6 +88,13 @@ public class AddItemActivity extends AppCompatActivity {
         mBtnSelectDate = findViewById(R.id.btn_select_date);
         mBtnSubmit = findViewById(R.id.btn_submit);
         mEtDescription = findViewById(R.id.et_description);
+        // 新增：图片控件
+        mBtnSelectImage = findViewById(R.id.btn_select_image);
+        mRvImagePreview = findViewById(R.id.rv_image_preview);
+        // 初始化图片预览RecyclerView
+        mImageAdapter = new ImagePreviewAdapter(this, mImagePaths);
+        mRvImagePreview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mRvImagePreview.setAdapter(mImageAdapter);
     }
 
     /**
@@ -140,6 +160,12 @@ public class AddItemActivity extends AppCompatActivity {
 
         // 描述
         mEtDescription.setText(item.getDescription() != null ? item.getDescription() : "");
+
+        // 新增：回显图片路径
+        if (item.getImagePaths() != null && !item.getImagePaths().isEmpty()) {
+            mImagePaths = item.getImagePathsList();  // 使用辅助方法获取列表
+            mImageAdapter.refreshData(mImagePaths);
+        }
     }
 
     /**
@@ -164,8 +190,54 @@ public class AddItemActivity extends AppCompatActivity {
         // 日期选择按钮
         mBtnSelectDate.setOnClickListener(v -> showDatePickerDialog());
 
+        // 新增：图片选择按钮
+        mBtnSelectImage.setOnClickListener(v -> {
+            // 检查权限
+            if (PermissionUtils.checkAndRequestPermissions(this)) {
+                // 权限已授予，显示选择菜单
+                showImageSelectMenu();
+            }
+        });
+
+        // 新增：图片预览点击/删除监听
+        mImageAdapter.setOnImageClickListener(position -> {
+            // 点击图片：跳转到图片预览页（可放大）
+            Intent intent = new Intent(this, ImagePreviewActivity.class);
+            intent.putStringArrayListExtra("imagePaths", new ArrayList<>(mImagePaths));
+            intent.putExtra("position", position);
+            startActivity(intent);
+        });
+
+        mImageAdapter.setOnImageDeleteListener(position -> {
+            // 删除图片
+            mImagePaths.remove(position);
+            mImageAdapter.refreshData(mImagePaths);
+            // 编辑模式下更新物品图片列表
+            if (isEditMode && mEditItem != null) {
+                mEditItem.setImagePathsList(mImagePaths);  // 改为使用辅助方法
+            }
+        });
+
         // 提交按钮
         mBtnSubmit.setOnClickListener(v -> submitItem());
+    }
+
+    /**
+     * 显示图片选择菜单（拍照/图库）
+     */
+    private void showImageSelectMenu() {
+        new AlertDialog.Builder(this)
+                .setTitle("选择图片来源")
+                .setItems(new String[]{"拍照", "从图库选择"}, (dialog, which) -> {
+                    if (which == 0) {
+                        // 拍照
+                        ImageUtils.openCamera(this);
+                    } else {
+                        // 图库选择
+                        ImageUtils.openGallery(this);
+                    }
+                })
+                .show();
     }
 
     /**
@@ -238,6 +310,12 @@ public class AddItemActivity extends AppCompatActivity {
             mEditItem.setQuantity(quantity);
             mEditItem.setExpiryDate(expiryDate);
             mEditItem.setDescription(description);
+
+            // 设置图片路径（重要！）
+            if (!mImagePaths.isEmpty()) {
+                mEditItem.setImagePathsList(mImagePaths);  // 使用辅助方法
+            }
+
             // 调用ViewModel更新物品（关键：传入原有Item对象）
             mViewModel.updateItem(mEditItem);
             Toast.makeText(this, "物品修改成功！", Toast.LENGTH_SHORT).show();
@@ -252,6 +330,11 @@ public class AddItemActivity extends AppCompatActivity {
             item.setExpiryDate(expiryDate);
             item.setDescription(description);
 
+            // 设置图片路径（重要！）
+            if (!mImagePaths.isEmpty()) {
+                item.setImagePathsList(mImagePaths);  // 使用辅助方法
+            }
+
             // 调用ViewModel保存物品
             mViewModel.insertItem(item);
             Toast.makeText(this, "物品添加成功！", Toast.LENGTH_SHORT).show();
@@ -259,5 +342,49 @@ public class AddItemActivity extends AppCompatActivity {
 
         // 4. 返回主页面
         finish();
+    }
+
+    /**
+     * 权限申请结果回调
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PermissionUtils.REQUEST_CODE_PERMISSIONS) {
+            if (PermissionUtils.verifyPermissions(grantResults)) {
+                // 权限申请成功，显示图片选择菜单
+                showImageSelectMenu();
+            } else {
+                Toast.makeText(this, "需要相机和存储权限才能选择图片！", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * 图片选择/拍照结果回调
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            String imagePath = null;
+            if (requestCode == ImageUtils.REQUEST_CODE_CAMERA) {
+                // 拍照返回
+                imagePath = ImageUtils.handleCameraResult();
+            } else if (requestCode == ImageUtils.REQUEST_CODE_GALLERY && data != null) {
+                // 图库返回
+                imagePath = ImageUtils.handleGalleryResult(this, data.getData());
+            }
+
+            // 添加图片路径并刷新预览
+            if (imagePath != null && !imagePath.isEmpty()) {
+                mImagePaths.add(imagePath);
+                mImageAdapter.refreshData(mImagePaths);
+                // 编辑模式下更新物品图片列表
+                if (isEditMode && mEditItem != null) {
+                    mEditItem.setImagePathsList(mImagePaths);  // 改为使用辅助方法
+                }
+            }
+        }
     }
 }

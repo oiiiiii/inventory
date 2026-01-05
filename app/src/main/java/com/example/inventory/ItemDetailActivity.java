@@ -2,7 +2,10 @@ package com.example.inventory;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,8 +16,10 @@ import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class ItemDetailActivity extends AppCompatActivity {
@@ -34,6 +39,9 @@ public class ItemDetailActivity extends AppCompatActivity {
     private Button mBtnEdit;
     private Button mBtnDelete;
 
+    // 新增：图片预览
+    private RecyclerView mRvItemImages;
+    private ImagePreviewAdapter mImageAdapter;
     // ViewModel
     private InventoryViewModel mViewModel;
 
@@ -78,20 +86,19 @@ public class ItemDetailActivity extends AppCompatActivity {
         mTvUpdateTime = findViewById(R.id.tv_update_time);
         mBtnEdit = findViewById(R.id.btn_edit);
         mBtnDelete = findViewById(R.id.btn_delete);
+
+        // 新增：图片预览
+        mRvItemImages = findViewById(R.id.rv_item_images);
+        mImageAdapter = new ImagePreviewAdapter(this, new ArrayList<>());
+        mRvItemImages.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mRvItemImages.setAdapter(mImageAdapter);
     }
 
-    /**
-     * 初始化ViewModel
-     */
     private void initViewModel() {
         mViewModel = new ViewModelProvider(this).get(InventoryViewModel.class);
     }
 
-    /**
-     * 加载物品数据
-     */
     private void loadItemData() {
-        // 获取从MainActivity传递的物品ID
         String itemId = getIntent().getStringExtra(EXTRA_ITEM_ID);
         if (itemId == null || itemId.isEmpty()) {
             Toast.makeText(this, "物品ID为空！", Toast.LENGTH_SHORT).show();
@@ -99,19 +106,22 @@ public class ItemDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // 从ViewModel获取物品数据
-        mViewModel.getItemById(itemId).observe(this, item -> {
-            if (item == null) {
-                Toast.makeText(this, "物品不存在！", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
+        mViewModel.getItemById(itemId).observe(this, new Observer<Item>() {
+            @Override
+            public void onChanged(Item item) {
+                if (item == null) {
+                    Toast.makeText(ItemDetailActivity.this, "物品不存在！", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
+
+                mCurrentItem = item;
+                bindItemData(item);
+
+                // 新增：加载图片（使用辅助方法）
+                List<String> imagePaths = item.getImagePathsList();  // 改为使用辅助方法
+                mImageAdapter.refreshData(imagePaths);
             }
-
-            // 保存当前物品
-            mCurrentItem = item;
-
-            // 绑定数据到UI
-            bindItemData(item);
         });
     }
 
@@ -203,5 +213,16 @@ public class ItemDetailActivity extends AppCompatActivity {
                     .setNegativeButton("取消", null)
                     .show();
         });
+        // 新增：图片预览点击（放大）
+        mImageAdapter.setOnImageClickListener(position -> {
+            Intent intent = new Intent(this, ImagePreviewActivity.class);
+            // 使用辅助方法获取图片路径列表
+            intent.putStringArrayListExtra("imagePaths", new ArrayList<>(mCurrentItem.getImagePathsList()));
+            intent.putExtra("position", position);
+            startActivity(intent);
+        });
+
+        // 详情页图片不显示删除按钮
+        mImageAdapter.setOnImageDeleteListener(null);
     }
 }

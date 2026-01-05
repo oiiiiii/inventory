@@ -224,6 +224,39 @@
                 android:textColorHint="@color/text_secondary"
                 android:textSize="16sp" />
         </LinearLayout>
+        <!-- 物品描述下方添加图片管理区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="物品图片"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"/>
+
+            <!-- 图片选择按钮 -->
+            <Button
+                android:id="@+id/btn_select_image"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="选择图片（拍照/图库）"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- 图片预览网格（多图） -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_image_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"/>
+
+        </LinearLayout>
 
         <!-- 提交按钮 -->
         <Button

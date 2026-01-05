@@ -53,5 +53,8 @@
     <color name="danger">#F44336</color>
     <!-- 危险色按下状态 -->
     <color name="danger_pressed">#D32F2F</color>
+    <!-- 新增颜色 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 
 </resources>

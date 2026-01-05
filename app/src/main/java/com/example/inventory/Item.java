@@ -4,11 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 物品实体类
  * 对应Room数据库的item表
  */
+// 添加类型转换器，支持List<String>存储
+@TypeConverters({Item.ImagePathConverter.class})
 @Entity(tableName = "item")
 public class Item {
     // UUID作为主键，唯一标识物品（强制非空）
@@ -66,13 +73,11 @@ public class Item {
         this.expiryDate = expiryDate;
         this.description = description;
         this.imagePaths = imagePaths;
-        // 默认初始化时间
-        long currentTime = System.currentTimeMillis();
-        this.createTime = new java.text.SimpleDateFormat("yyyy.MM.dd HH:mm", java.util.Locale.getDefault()).format(currentTime);
-        this.updateTime = this.createTime;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
     }
 
-    // ==================== 所有字段的Getter/Setter方法（必须完整） ====================
+    // ==================== 所有字段的Getter/Setter方法 ====================
     @NonNull
     public String getId() {
         return id;
@@ -91,7 +96,6 @@ public class Item {
         this.name = name;
     }
 
-    // category字段的Getter/Setter（修复核心）
     public String getCategory() {
         return category;
     }
@@ -100,7 +104,6 @@ public class Item {
         this.category = category;
     }
 
-    // subCategory字段的Getter/Setter
     public String getSubCategory() {
         return subCategory;
     }
@@ -109,7 +112,6 @@ public class Item {
         this.subCategory = subCategory;
     }
 
-    // location字段的Getter/Setter
     public String getLocation() {
         return location;
     }
@@ -118,7 +120,6 @@ public class Item {
         this.location = location;
     }
 
-    // quantity字段的Getter/Setter
     public int getQuantity() {
         return quantity;
     }
@@ -127,7 +128,6 @@ public class Item {
         this.quantity = quantity;
     }
 
-    // expiryDate字段的Getter/Setter
     public String getExpiryDate() {
         return expiryDate;
     }
@@ -136,7 +136,6 @@ public class Item {
         this.expiryDate = expiryDate;
     }
 
-    // description字段的Getter/Setter
     public String getDescription() {
         return description;
     }
@@ -145,7 +144,7 @@ public class Item {
         this.description = description;
     }
 
-    // imagePaths字段的Getter/Setter
+    // imagePaths字段的Getter/Setter - 返回String类型（与数据库字段类型一致）
     public String getImagePaths() {
         return imagePaths;
     }
@@ -170,5 +169,60 @@ public class Item {
 
     public void setUpdateTime(@NonNull String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    // ======== 辅助方法：处理List<String>格式的图片路径 ========
+
+    /**
+     * 获取图片路径列表（List格式）
+     * 注意：这不是数据库字段的getter，只是一个辅助方法
+     */
+    @Ignore
+    public List<String> getImagePathsList() {
+        return ImagePathConverter.toList(imagePaths);
+    }
+
+    /**
+     * 设置图片路径列表（List格式）
+     * 注意：这不是数据库字段的setter，只是一个辅助方法
+     */
+    @Ignore
+    public void setImagePathsList(List<String> imagePathsList) {
+        this.imagePaths = ImagePathConverter.fromList(imagePathsList);
+    }
+
+    // ======== 类型转换器：List<String> ↔ String（Room不直接支持List） ========
+    public static class ImagePathConverter {
+        // List<String> → String（用逗号分隔）
+        @androidx.room.TypeConverter
+        public static String fromList(List<String> list) {
+            if (list == null || list.isEmpty()) {
+                return "";
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < list.size(); i++) {
+                sb.append(list.get(i));
+                if (i < list.size() - 1) {
+                    sb.append(",");
+                }
+            }
+            return sb.toString();
+        }
+
+        // String → List<String>
+        @androidx.room.TypeConverter
+        public static List<String> toList(String str) {
+            List<String> list = new ArrayList<>();
+            if (str == null || str.isEmpty()) {
+                return list;
+            }
+            String[] paths = str.split(",");
+            for (String path : paths) {
+                if (!path.isEmpty()) {
+                    list.add(path);
+                }
+            }
+            return list;
+        }
     }
 }
